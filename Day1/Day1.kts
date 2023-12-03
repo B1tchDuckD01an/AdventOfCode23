@@ -1,102 +1,65 @@
 import java.io.File
-val lines = File("test.txt").readLines()
-
-
+val lines = File("input.txt").readLines()
 
 fun getFirstLastDigits(str : List<String>) :List<Int> =
     str.map {
     it.filter { it.isDigit() }
 }.map { (it.first().toString() + it.last().toString()).toInt()}
 
-
 println("pt1 ")
 //val digits = getFirstLastDigits(lines)
 //println(digits.sum())
 
-
 println("pt 2")
 
-for( line in lines) {
-    val digits = mutableListOf<Int>()
-    val chars = mutableListOf<Char>()
-    println(line)
-    for (char in line) {
-        if (char.isDigit()) {
-            digits.add(char.toInt())
-            chars.clear()
-        } else {
-            chars.add(char)
-            when(chars.joinToString("")) {
-                "one" -> {
-                    digits.add(1)
-                    chars.clear()
-                }
-                "two" -> {
-                    digits.add(2)
-                    chars.clear()
+val digitmap = mapOf<String,Int>(
+    "one" to 1,
+    "two" to 2,
+    "three" to 3,
+    "four" to 4,
+    "five" to 5,
+    "six" to 6,
+    "seven" to 7,
+    "eight" to 8,
+    "nine" to 9)
 
-                }
-                "three" -> {
-                    digits.add(3)
-                    chars.clear()
-
-                }
-                "four" -> {
-                    digits.add(4)
-                    chars.clear()
-
-                }
-                "five" -> {
-                    digits.add(5)
-                    chars.clear()
-
-                }
-            "six" ->{
-                digits.add(6)
-                chars.clear()
-
-            }
-            "seven"-> {
-                digits.add(7)
-            }
-            "eight"->{
-                digits.add(8)
-                chars.clear()
-
-            }
-            "nine"-> {
-                digits.add(9)
-                chars.clear()
-
-            }
-            }
+fun getDigits(string: String, map: Map<String,Int>): Int {
+    for (key in map.keys) {
+        if (string.contains(key)) {
+            val value = map[key]
+                if(value != null)
+                    return value
         }
     }
-
-    println(chars)
-    println(digits)
+    return 0
 }
 
-/*
+//fun runCheck(bool: Boolean, digitlist: MutableList<Int>, charllist: MutableList<Char>)
+var values = mutableListOf<Int>()
 
-
-var sz = 5
-val atte = lines.map {
-    if(it.length <= 5) {
-        replaceText(it,unitmap)
-    } else {
-    it.windowed(sz,1).map { str ->
-            str.map {
-                println(str)
-                val stuff = str.filter { it.isDigit() }
-                if (stuff.length == 0) {
-                    println("no digits found, attempt replacing : " + str)
-                    replaceText(str, unitmap)
-                } else {
-                    println("digits found, keeping : " + str)
-                    str
+for(line in lines) {
+    val digits = mutableListOf<Int>()
+    val chars = mutableListOf<Char>()
+    for (char in line) {
+            if (char.isDigit()) {
+                digits.add(char.toString().toInt())
+                chars.clear()
+            } else {
+                chars.add(char)
+                if(chars.joinToString("").length >= 3){
+                var digit = getDigits(chars.joinToString(""),digitmap)
+                if(digit != 0)
+                {
+                    digits.add(digit)
+                    chars.clear()
+                    //incase of shared endings
+                    chars.add(char)
                 }
             }
-        }}}.map{it.toString().filter{ it.isDigit()}}
-println(atte)
-println(getFirstLastDigits(atte).sum())
+            }
+    }
+    values.add((digits.first().toString() + digits.last().toString()).toInt())
+}
+
+println(values)
+println(values.sum())
