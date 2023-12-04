@@ -1,9 +1,24 @@
 import java.io.File
 import java.math.BigInteger
 
-val lines = File("input.txt").readLines()
+val lines = File("test.txt").readLines()
 
 data class Position(val x: Int, val y: Int)
+{
+
+    fun left():Position{
+        return Position(x-1,y )
+    }
+    fun right():Position{
+        return Position(x+1, y)
+    }
+    fun up(): Position{
+        return Position(x,y-1)
+    }
+    fun down(): Position{
+        return Position(x,y+1)
+    }
+}
 
 fun getAdjacentSymbols(map: Map<Position, Char>, position: Position): List<Char> {
     val (row, col) = position
@@ -19,21 +34,19 @@ fun getAdjacentSymbols(map: Map<Position, Char>, position: Position): List<Char>
         .filter { !it.isDigit() && !(it in ".") }
 }
 
-
 fun convertToMap(strings: List<String>): MutableMap<Position, Char> {
     val resultMap = mutableMapOf<Position, Char>()
 
     strings.forEachIndexed { outerIndex, str ->
         str.forEachIndexed { innerIndex, char ->
-            resultMap[Position(outerIndex, innerIndex)] = char
+            resultMap[Position(innerIndex, outerIndex)] = char
         }
     }
 
     return resultMap
 }
 
-fun getSumAdjacentSymbols(map: MutableMap<Position, Char>):MutableList<Pair<Int,Boolean>>
-{
+fun getSumAdjacentSymbols(map: MutableMap<Position, Char>):Int{
     var part = mutableListOf<Int>()
     var parts = mutableListOf<Pair<Int,Boolean>>()
     var symbol = false
@@ -55,15 +68,93 @@ fun getSumAdjacentSymbols(map: MutableMap<Position, Char>):MutableList<Pair<Int,
             part.clear()
         }
     }
-    return parts
+    return parts.filter { it.second == true }.map { it.first}.sum()
 }
 
-val resultpt1 = getSumAdjacentSymbols(convertToMap(lines))
+fun getGearPositions(map: MutableMap<Position, Char>): Map<Position, Char>
+{
+    return map.filter{ it.value in "*" }
+}
 
-println("part 1 ")
+fun searchParts(fullmap : MutableMap<Position, Char>, gears:  Map<Position, Char>)
+{
+    gears.keys.forEach{
 
-println(resultpt1)
 
-println(resultpt1.filter { it.second == true }.map { it.first}.sum())
+    }
+
+fun searchFullPart(map: Map<Position, Char>, digitPosition: Position):Int {
+
+    var start = Position(-2,-2)
+    var end = Position(-2,-2)
+
+    fun getStart(pos: Position) {
+
+        // Search left
+        println("Searching $pos for start ")
+
+        val char = map[pos]!!
+
+        if (char.isDigit()) {
+            println("Found $char is a digit, looking left")
+            if (pos.x != 0) {
+                getStart(pos.left())
+            } else {
+                // Update the start variable only when there are no more digits to the left
+                println("$pos is the start")
+                start = pos
+            }
+
+        }
+
+    }
+
+    fun getEnd(pos: Position) {
+        //search left
+        println("searching $pos")
+        val char = map[pos]!!
+        if(pos.right().x != 140)
+        {
+        if (char.isDigit()) {
+           // println("found " + char + " is digit, looking right")
+            getEnd(pos.right())
+        } else {
+            println("$pos is the end")
+            end = pos
+        }
+    }
+    }
+
+    var part = mutableListOf<Char>()
+    println("x = " + digitPosition.x.toString())
+
+
+    getStart(digitPosition)
+    println ("start is : " + start.x.toString())
+
+    getEnd(digitPosition)
+
+
+    println(" end is : " + end.x.toString() )
+    return 1
+
+}
+
+val map = convertToMap(lines)
+
+//val resultpt1 = getSumAdjacentSymbols(map)
+
+//println("part 1 ")
+
+//println(resultpt1)
+
+val gears = getGearPositions(map)
+
+
+for(gear in gears.keys)
+{
+    println(gear)
+    println(constructIntegers(map,gear))
+}
 
 println("part 2 ")
