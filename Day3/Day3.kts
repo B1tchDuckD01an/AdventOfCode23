@@ -47,8 +47,8 @@ fun convertToMap(strings: List<String>): MutableMap<Position, Char> {
 }
 
 fun getSumAdjacentSymbols(map: MutableMap<Position, Char>):Int{
-    var part = mutableListOf<Int>()
-    var parts = mutableListOf<Pair<Int,Boolean>>()
+    val part = mutableListOf<Int>()
+    val parts = mutableListOf<Pair<Int,Boolean>>()
     var symbol = false
     for(entry in map.entries)
     {
@@ -76,12 +76,93 @@ fun getGearPositions(map: MutableMap<Position, Char>): Map<Position, Char>
     return map.filter{ it.value in "*" }
 }
 
-fun searchParts(fullmap : MutableMap<Position, Char>, gears:  Map<Position, Char>)
-{
-    gears.keys.forEach{
+fun searchParts(fullmap : MutableMap<Position, Char>, gears:  Map<Position, Char>): MutableList<Pair<Position,Position>> {
 
+    fun addPair(initial: Pair<Position, Position>, pos : Position): Pair<Position, Position> {
+        if (initial.first == Position(-100, -100)) {
+            return Pair(pos, Position(-100, -100))
+        }
+        return Pair(initial.first, pos)
 
     }
+
+    fun searchDirections(it: Position, pairs: MutableList<Pair<Position, Position>>, index: Int): MutableList<Pair<Position, Position>> {
+
+        fun checkPos(pair: Pair<Position, Position>): Boolean {
+            println( "checking $pair")
+            if (pair.first.x == -100 || pair.first.y == -100 || pair.second.x == -100 || pair.second.y == -100)
+                return false
+            println("returned true ")
+            return true
+
+        }
+        println( "searching $it")
+
+        if (fullmap[it.up()]!!.isDigit()) {
+            pairs.add(index, addPair(pairs[index], it.up()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+
+        //search down
+        if (fullmap[it.down()]!!.isDigit()) {
+            pairs.add(index, addPair(pairs[index], it.down()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+
+//search left
+        if (fullmap[it.left()]!!.isDigit()) {
+            pairs.add(index, addPair(pairs[index], it.left()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+
+//search right
+        if (fullmap[it.right()]!!.isDigit()) {
+            pairs.add(index,addPair(pairs[index], it.right()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+        //search up left
+        if (fullmap[it.up().left()]!!.isDigit()) {
+            pairs.add(index,addPair(pairs[index], it.up().left()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+
+        //search up right
+        if (fullmap[it.up().right()]!!.isDigit()) {
+            pairs.add(index,addPair(pairs[index], it.up().right()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+
+        //search down left
+        if (fullmap[it.down().left()]!!.isDigit()) {
+            pairs.add(index,addPair(pairs[index], it.down().left()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+
+        //search down left
+        if (fullmap[it.down().right()]!!.isDigit()) {
+            pairs.add(index,addPair(pairs[index], it.down().right()))
+            if (checkPos(pairs[index]))
+                return pairs
+        }
+        return pairs
+    }
+
+    var pairs = mutableListOf<Pair<Position, Position>>()
+
+
+    gears.keys.forEachIndexed { index, it ->
+        pairs.add(index,Pair<Position, Position>(Position(-100, -100), Position(-100, -100)))
+        pairs = searchDirections(it, pairs, index)
+    }
+    return pairs
+}
 
 fun searchFullPart(map: Map<Position, Char>, digitPosition: Position):Int {
 
@@ -115,14 +196,15 @@ fun searchFullPart(map: Map<Position, Char>, digitPosition: Position):Int {
         val char = map[pos]!!
         if(pos.right().x != 140)
         {
-        if (char.isDigit()) {
-           // println("found " + char + " is digit, looking right")
-            getEnd(pos.right())
-        } else {
-            println("$pos is the end")
-            end = pos
+            if (char.isDigit()) {
+                // println("found " + char + " is digit, looking right")
+                getEnd(pos.right())
+            }
+            else {
+                println("$pos is the end")
+                end = pos
+            }
         }
-    }
     }
 
     var part = mutableListOf<Char>()
@@ -150,11 +232,6 @@ val map = convertToMap(lines)
 
 val gears = getGearPositions(map)
 
-
-for(gear in gears.keys)
-{
-    println(gear)
-    println(constructIntegers(map,gear))
-}
+println(searchParts(map, gears))
 
 println("part 2 ")
