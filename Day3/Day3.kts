@@ -55,7 +55,6 @@ fun convertToMap(strings: List<String>): MutableMap<Position, Char> {
             resultMap[Position(innerIndex, outerIndex)] = char
         }
     }
-
     return resultMap
 }
 
@@ -89,83 +88,56 @@ fun getGearPositions(map: MutableMap<Position, Char>): Map<Position, Char>
     return map.filter{ it.value in "*" }
 }
 
-fun searchParts(fullmap : MutableMap<Position, Char>, gears:  Map<Position, Char>): MutableList<Pair<Position,Position>> {
+fun searchParts(fullmap : MutableMap<Position, Char>, gears:  Map<Position, Char>): MutableMap<Position, MutableList<Int>>{
+    fun searchDirections(it: Position, pairs: MutableMap<Position, MutableList<Int>>): MutableMap<Position, MutableList<Int>> {
 
-    fun addPair(initial: Pair<Position, Position>, pos : Position): Pair<Position, Position> {
-        if (initial.first == Position(-100, -100)) {
-            return Pair(pos, Position(-100, -100))
-        }
-        return Pair(initial.first, pos)
-
-    }
-
-    fun searchDirections(it: Position, pairs: MutableList<Pair<Position, Position>>, index: Int): MutableList<Pair<Position, Position>> {
-
+        //search up
         if (fullmap[it.up()]!!.isDigit()) {
-            pairs.set(index, addPair(pairs[index], it.up()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap,it.up()))
         }
-
         //search down
         if (fullmap[it.down()]!!.isDigit()) {
-            pairs.set(index, addPair(pairs[index], it.down()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap,it.down()))
         }
-
-//search left
+        //search left
         if (fullmap[it.left()]!!.isDigit()) {
-            pairs.set(index, addPair(pairs[index], it.left()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap,it.left()))
         }
-
-//search right
+        //search right
         if (fullmap[it.right()]!!.isDigit()) {
-            pairs.set(index,addPair(pairs[index], it.right()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap, it.right()))
         }
         //search up left
         if (fullmap[it.up().left()]!!.isDigit()) {
-            pairs.set(index,addPair(pairs[index], it.up().left()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap,it.up().left()))
         }
-
         //search up right
         if (fullmap[it.up().right()]!!.isDigit()) {
-            pairs.set(index,addPair(pairs[index], it.up().right()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap,it.up().right()))
         }
-
         //search down left
         if (fullmap[it.down().left()]!!.isDigit()) {
-            pairs.set(index,addPair(pairs[index], it.down().left()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap,it.down().left()))
         }
-
         //search down left
         if (fullmap[it.down().right()]!!.isDigit()) {
-            pairs.set(index,addPair(pairs[index], it.down().right()))
-            if(pairs[index].second.x != -100)
-                return pairs
+            pairs[it]!!.add(searchFullPart(fullmap,it.down().right()))
         }
         return pairs
     }
 
-    val pairs = mutableListOf<Pair<Position, Position>>()
+    val pairs : MutableMap<Position, MutableList<Int>> = mutableMapOf<Position,MutableList<Int>>()
 
-
-    gears.keys.forEachIndexed { index, it ->
-        pairs.add(index,Pair(Position(-100,-100),Position(-100,-100)))
-        searchDirections(it, pairs, index)
+    gears.keys.forEach {
+        pairs[it] = mutableListOf<Int>()
+        searchDirections(it, pairs)
     }
- //   println(pairs)
-    return pairs
+
+    pairs.entries.forEach{
+        pairs[it.key] =  it.value.distinct().toMutableList()
+    }
+
+    return pairs.filter{ it.value.size == 2}.toMutableMap()
 }
 
 fun searchFullPart(map: Map<Position, Char>, digitPosition: Position):Int {
@@ -222,19 +194,7 @@ val map = convertToMap(lines)
 
 val gears = getGearPositions(map)
 
-gears.forEach {
-  println( "$it " +   getAdjacentDigits(map, it.key))
-}
-var products = mutableListOf<Long>()
-
-var product :Long = 0
-var parts = searchParts(map, gears)
-
-parts.filter { it.second.x != -100}.forEach {
-    val start = searchFullPart(map,it.first)
-    val end = searchFullPart(map,it.second)
-
-    products.add((start * end).toLong())
-    product += start*end
-}
-
+var parts :  MutableMap<Position, MutableList<Int>> = searchParts(map, gears)
+println(parts)
+var products = parts.map{ it.value.first() * it.value.last() }
+println(products.sum())
