@@ -186,15 +186,14 @@ fun searchFullPart(map: Map<Position, Char>, digitPosition: Position):Int {
 
 val map = convertToMap(lines)
 
-//val resultpt1 = getSumAdjacentSymbols(map)
+val resultpt1 = getSumAdjacentSymbols(map)
 
-//println("part 1 ")
+println("part 1 ")
+println(resultpt1)
 
-//println(resultpt1)
-
+println("part 2 ")
 val gears = getGearPositions(map)
 
 var parts :  MutableMap<Position, MutableList<Int>> = searchParts(map, gears)
-println(parts)
 var products = parts.map{ it.value.first() * it.value.last() }
 println(products.sum())
